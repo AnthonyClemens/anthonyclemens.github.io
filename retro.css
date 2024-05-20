@@ -1,0 +1,78 @@
+/* Retro 90s CSS Styles */
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #008080;
+    color: #ffff00;
+    text-shadow: 1px 1px 2px black;
+    cursor: url("img/xp.png"), pointer;
+}
+
+a {
+    color: #0000ff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+header, main, footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+section {
+    background-color: #336666;
+    color: #00ff00;
+    border: 3px dashed #0000ff;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 50%;
+}
+
+marquee {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+    color: #ffff00;
+    background-color: #336666;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+ul {
+    list-style-type: square;
+}
+
+a img {
+    border: 3px solid #0000ff;
+    width: 100%;
+}
+
+/* Add a classic 'visitor counter' at the bottom of the page */
+footer::after {
+    content: "Visitors: 123456";
+    font-family: 'Courier New', monospace;
+    background-color: #000080;
+    color: #00ff00;
+    padding: 5px;
+    margin-top: 20px;
+}
+
+/* Style the links to look like buttons */
+a {
+    display: inline-block;
+    background-color: #000080;
+    color: #00ff00;
+    padding: 5px 10px;
+    margin: 5px;
+    border: 2px outset #0000ff;
+}
+
+a:active {
+    border-style: inset;
+}
