@@ -29,7 +29,8 @@ section {
     border: 3px dashed #0000ff;
     padding: 20px;
     margin-bottom: 20px;
-    width: 50%;
+    min-width: 50%;
+    max-width: 80%;
 }
 
 marquee {
