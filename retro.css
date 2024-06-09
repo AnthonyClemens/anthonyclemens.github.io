@@ -7,6 +7,15 @@ body {
     cursor: url("img/xp.png"), pointer;
 }
 
+canvas {
+    background: black;
+}
+
+button {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
 a {
     color: #0000ff;
     text-decoration: none;
