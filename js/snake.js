@@ -44,10 +44,15 @@ function main(){
 function init(){
     canvas = document.getElementById("snakeCanvas");
     context = canvas.getContext("2d");
-    const scoreDiv = document.createElement("div");
-    scoreText =  document.createTextNode("Score: 0");
-    scoreDiv.appendChild(scoreText);
-    canvas.after(scoreDiv);
+    if(document.getElementById("scoreDiv")==null){
+        var scoreDiv = document.createElement("div");
+        scoreDiv.setAttribute("id","scoreDiv");
+        scoreText =  document.createTextNode("Score: 0");
+        scoreDiv.appendChild(scoreText);
+        canvas.after(scoreDiv);
+    }else{
+        scoreText = document.getElementById("scoreDiv");
+    }
     canvasW = canvas.clientWidth;
     canvasH = canvas.clientHeight;
     
@@ -79,6 +84,10 @@ function setMovement(direction){
     }else{
         movement.none = true;
     }
+}
+
+function drawSnake(){
+    
 }
 
 function drawGame(){
