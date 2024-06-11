@@ -6,8 +6,13 @@ var context;
 var scoreText;
 var canvasW;
 var canvasH;
+var totalChunks;
+
 var head;
-var rot;
+var body;
+var tail;
+var bg;
+var apple;
 
 //Movement Enum
 const movement = {
@@ -28,22 +33,22 @@ var snakeXs;
 var snakeYs;
 var appleX;
 var appleY;
-var score;
-var snakeLength;
+var score = 0;
+var snakeLength = 2;
+var snakeRots;
 
 
 function main(){
     init();
     drawGame();
-    snakeXs[0]=16;
-    snakeYs[0]=16;
-    drawGame();
-    console.log(canvasW, canvasH,snakeXs[0],snakeYs[0],movement);
+    setScore(score);
+    console.log(canvasW, canvasH,snakeXs[1],snakeYs[1],movement,snakeLength);
 }
 
 function init(){
     canvas = document.getElementById("snakeCanvas");
     context = canvas.getContext("2d");
+    //Setup the score
     if(document.getElementById("scoreDiv")==null){
         var scoreDiv = document.createElement("div");
         scoreDiv.setAttribute("id","scoreDiv");
@@ -53,24 +58,41 @@ function init(){
     }else{
         scoreText = document.getElementById("scoreDiv");
     }
+    //Get data from the canvas
     canvasW = canvas.clientWidth;
     canvasH = canvas.clientHeight;
-    
+    totalChunks = (canvasW*canvasH)/(pixelSize*pixelSize);
+    //Set the Array Lengths for canvas calculated sizes
     try{
-        snakeXs = new Array(((canvasW*canvasH)/(pixelSize*pixelSize)));
-        snakeYs = new Array(((canvasW*canvasH)/(pixelSize*pixelSize)));
+        snakeXs = new Array(totalChunks);
+        snakeYs = new Array(totalChunks);
+        snakeRots = new Array(totalChunks);
     }catch{
         console.error("Canvas width and height must be a multiple of "+pixelSize);
         return;
     }
-
+    //Set default snake parameters
     snakeXs[0]=canvasW/2;
     snakeYs[0]=canvasH/2;
-
+    snakeXs[1]=(canvasW/2);
+    snakeYs[1]=(canvasH/2)+pixelSize;
+    snakeRots[0]=0;
+    snakeRots[1]=0;
+    //Load assets
     head = new Image();
     head.src = 'js/head.png';
 
-    snakeLength = 1;
+    body = new Image();
+    body.src = "js/body.png";
+
+    tail = new Image();
+    tail.src = "js/tail.png";
+
+    bg = new Image();
+    bg.src = "js/grass.png";
+
+    apple = new Image();
+    apple.src = "js/apple.png";
 }
 
 function setMovement(direction){
@@ -87,34 +109,107 @@ function setMovement(direction){
 }
 
 function drawSnake(){
-    
+    for(var i = 0; i < snakeLength; i++){
+        context.save();
+        context.translate(snakeXs[i], snakeYs[i]);
+        var rot = snakeRots[i];
+        context.rotate(rot);
+        if(i===0){
+            context.drawImage(head,-(pixelSize/2),-(pixelSize/2),pixelSize,pixelSize);
+        }else if(i===snakeLength-1){
+            context.drawImage(tail,-(pixelSize/2),-(pixelSize/2),pixelSize,pixelSize);
+        }else{
+            context.drawImage(body,-(pixelSize/2),-(pixelSize/2),pixelSize,pixelSize);
+        }
+        context.rotate(-rot);
+        context.translate(-snakeXs[i],-snakeYs[i]);
+        context.stroke();
+        context.restore();
+        console.log(i);
+    }
+    context.stroke();
 }
+
+
+function setScore(score){
+    document.getElementById("scoreDiv").textContent="Score: "+score;
+}
+
+function drawBg(){
+    var pattern = context.createPattern(bg, 'repeat');
+    context.rect(0,0,canvasW,canvasH);
+    context.fillStyle=pattern;
+    context.fill();
+}
+
+function drawApple(){
+    context.drawImage(apple, 0, 0,pixelSize,pixelSize);
+}
+
+function makeApple(){
+
+}
+
+function simulate(){
+    var oldX = snakeXs[1];
+    var oldY = snakeYs[1];
+    var oldRot = snakeRots[1];
+    var old2X, old2Y, old2Rot;
+    snakeXs[1] = snakeXs[0];
+    snakeYs[1] = snakeYs[0];
+    snakeRots[1] = snakeRots[0];
+    for(var i = 2; i < snakeLength; i++){
+        old2X = snakeXs[i];
+        old2Y = snakeYs[i];
+        old2Rot = snakeRots[i];
+        snakeXs[i] = oldX;
+        snakeYs[i] = oldY;
+        snakeRots[i] = oldRot;
+        oldX = old2X;
+        oldY = old2Y;
+        oldRot = old2Rot;
+    }
+    var rotate;
+    if(movement.none||movement.up){
+        snakeRots[0] = 0;
+        if(!movement.none){
+            snakeYs[0] = snakeYs[0]-pixelSize;
+        }
+    }else if(movement.down){
+        snakeRots[0] = Math.PI;
+    }else if(movement.left){
+        snakeRots[0] = (3*Math.PI)/2
+    }else{
+        snakeRots[0] = Math.PI/2;
+    }
+}
+
+check
 
 function drawGame(){
     context.clearRect(0,0,canvasW,canvasH);
-    
-    for(var i = 0; i < snakeLength; i++){
-        if(i==0){
-            context.save();
-            context.translate(snakeXs[0], snakeYs[0]);
-            if(movement.none||movement.up){
-                rot = 0;
-            }else if(movement.down){
-                rot = Math.PI;
-            }else if(movement.left){
-                rot = (3*Math.PI)/2
-            }else{
-                rot = Math.PI/2;
-            }
-            context.rotate(rot);
-            context.drawImage(head,-(pixelSize/2),-(pixelSize/2),pixelSize,pixelSize);
-            context.rotate(-rot);
-            context.translate(-snakeXs[0],-snakeYs[0]);
-            context.stroke();
-            context.restore();
-            console.log(rot);
-        }
+    drawBg();
+    drawSnake();
+    drawApple();
+}
+
+onkeydown = function(e) {
+
+    var key = e.which;
+
+    if ((key == 65) && (!movement.right)) {
+        setMovement('left');
     }
 
-    context.stroke();
-}
+    if ((key == 68) && (!movement.left)) {
+        setMovement('right');
+    }
+
+    if ((key == 87) && (!movement.down)) {
+        setMovement('up');
+    }
+
+    if ((key == 83) && (!movement.up)) {
+        setMovement('down');
+    }
+};
