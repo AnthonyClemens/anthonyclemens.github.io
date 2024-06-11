@@ -25,24 +25,34 @@ const movement = {
 
 //Game Constants
 const pixelSize = 32;
-const snakeSpeed = 10;
-const speedMultiplier = 1.2;
 
 //Game Variables
 var snakeXs;
 var snakeYs;
 var appleX;
 var appleY;
-var score = 0;
-var snakeLength = 2;
+var score;
+var snakeLength;
 var snakeRots;
+var gameOver;
+var frameDelay;
+var timer;
 
 
-function main(){
-    init();
-    drawGame();
-    setScore(score);
-    console.log(canvasW, canvasH,snakeXs[1],snakeYs[1],movement,snakeLength);
+function gameLoop(){
+    if(!gameOver){
+        timer = setTimeout(function()
+        {
+            if(!movement.none){
+                simulate();
+                checkCollision();
+                drawGame();
+            }
+            gameLoop();
+        }, frameDelay);
+    }else{
+        gameOverScreen();
+    }
 }
 
 function init(){
@@ -72,9 +82,9 @@ function init(){
         return;
     }
     //Set default snake parameters
-    snakeXs[0]=canvasW/2;
+    snakeXs[0]=(canvasW/2)+(pixelSize/2);
     snakeYs[0]=canvasH/2;
-    snakeXs[1]=(canvasW/2);
+    snakeXs[1]=(canvasW/2)+(pixelSize/2);
     snakeYs[1]=(canvasH/2)+pixelSize;
     snakeRots[0]=0;
     snakeRots[1]=0;
@@ -93,6 +103,17 @@ function init(){
 
     apple = new Image();
     apple.src = "js/apple.png";
+    setMovement('none');
+    gameOver = false;
+    score = 0;
+    snakeLength = 2;
+    frameDelay = 500;
+    if (timer !== null) {
+        clearTimeout(timer);
+    }
+    makeApple();
+    drawTitle();
+    gameLoop();
 }
 
 function setMovement(direction){
@@ -110,6 +131,9 @@ function setMovement(direction){
 
 function drawSnake(){
     for(var i = 0; i < snakeLength; i++){
+        if(snakeXs[i]==null&& snakeYs[i]==null){
+            return;
+        }
         context.save();
         context.translate(snakeXs[i], snakeYs[i]);
         var rot = snakeRots[i];
@@ -125,7 +149,6 @@ function drawSnake(){
         context.translate(-snakeXs[i],-snakeYs[i]);
         context.stroke();
         context.restore();
-        console.log(i);
     }
     context.stroke();
 }
@@ -143,11 +166,23 @@ function drawBg(){
 }
 
 function drawApple(){
-    context.drawImage(apple, 0, 0,pixelSize,pixelSize);
+    context.drawImage(apple, appleX, appleY,pixelSize,pixelSize);
 }
 
 function makeApple(){
-
+    while(true){
+        var tailTouch = 0;
+        appleX = (Math.floor(Math.random() * ((canvasW/pixelSize)-2))*pixelSize)+pixelSize;
+        appleY = (Math.floor(Math.random() * ((canvasH/pixelSize)-2))*pixelSize)+pixelSize;
+        for(var i = 0; i < snakeLength; i++){
+            if((snakeXs[i]==(appleX+(pixelSize/2))) && (snakeYs[i]==(appleY+(pixelSize/2)))){
+                tailTouch++;
+            }
+        }
+        if(tailTouch==0){
+            return;
+        }
+    }
 }
 
 function simulate(){
@@ -177,20 +212,66 @@ function simulate(){
         }
     }else if(movement.down){
         snakeRots[0] = Math.PI;
+        snakeYs[0] = snakeYs[0]+pixelSize;
     }else if(movement.left){
         snakeRots[0] = (3*Math.PI)/2
+        snakeXs[0] = snakeXs[0]-pixelSize;
     }else{
         snakeRots[0] = Math.PI/2;
+        snakeXs[0] = snakeXs[0]+pixelSize;
     }
 }
 
-check
+function checkCollision(){
+
+    if(snakeXs[0] > canvasW || snakeXs[0] < 0 || snakeYs[0] > canvasH || snakeYs[0] < 0){
+        gameOver=true;
+        return;
+    }
+
+    for(var i = 1; i < snakeLength; i++){
+        if((snakeXs[0] == snakeXs[i]) && (snakeYs[0] == snakeYs[i])){
+            gameOver=true;
+            return;
+        }
+    }
+
+    if((snakeXs[0]==(appleX+(pixelSize/2))) && (snakeYs[0]==(appleY+(pixelSize/2)))){
+            makeApple();
+            score = score+100;
+            setScore(score);
+            frameDelay=frameDelay-10;
+            snakeLength++;
+    }
+}
 
 function drawGame(){
     context.clearRect(0,0,canvasW,canvasH);
     drawBg();
     drawSnake();
     drawApple();
+}
+
+function gameOverScreen(){
+    drawGame();
+    context.fillStyle = 'white';
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+    context.font = 'normal bold 24px serif';
+
+    context.fillText('Game over', canvasW/2, canvasH/2);
+    context.fillText('JS Snake by Anthony Clemens 2024',canvasW/2,(canvasH/2)+pixelSize);
+}
+
+function drawTitle(){
+    drawGame();
+    context.fillStyle = 'white';
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+    context.font = 'normal bold 24px serif';
+
+    context.fillText('JavaScript Snake', canvasW/2, canvasH/2);
+    context.fillText('WASD for movement, Q for Quit',canvasW/2,(canvasH/2)+pixelSize);
 }
 
 onkeydown = function(e) {
@@ -211,5 +292,9 @@ onkeydown = function(e) {
 
     if ((key == 83) && (!movement.up)) {
         setMovement('down');
+    }
+    
+    if (key == 81){
+        gameOver=true;
     }
 };
