@@ -37,6 +37,9 @@ var snakeRots;
 var gameOver;
 var frameDelay;
 var timer;
+var music;
+var womp;
+var monch;
 
 
 function gameLoop(){
@@ -88,6 +91,7 @@ function init(){
     snakeYs[1]=(canvasH/2)+pixelSize;
     snakeRots[0]=0;
     snakeRots[1]=0;
+    snakeLength = 2;
     //Load assets
     head = new Image();
     head.src = 'js/head.png';
@@ -103,16 +107,39 @@ function init(){
 
     apple = new Image();
     apple.src = "js/apple.png";
+
+    monch = new Audio();
+    monch.src = "js/monch.mp3";
+    if(music==null){
+        music = new Audio();
+        music.src = "js/music.mp3";
+        music.volume = 0.1;
+    }
+
+    womp = new Audio();
+    womp.src = "js/womp.mp3";
+
+    //Finish setting up default values
     setMovement('none');
     gameOver = false;
     score = 0;
-    snakeLength = 2;
     frameDelay = 500;
     if (timer !== null) {
         clearTimeout(timer);
     }
     makeApple();
     drawTitle();
+    if(music.duration > 0 && !music.paused){
+        music.pause();
+        music.currentTime = 0;
+        music.play();
+    }else{
+        music.play();
+    }
+    music.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play();
+    }, false);
     gameLoop();
 }
 
@@ -242,6 +269,7 @@ function checkCollision(){
             setScore(score);
             frameDelay=frameDelay-10;
             snakeLength++;
+            monch.play();
     }
 }
 
@@ -254,6 +282,8 @@ function drawGame(){
 
 function gameOverScreen(){
     drawGame();
+    music.pause();
+    womp.play();
     context.fillStyle = 'white';
     context.textBaseline = 'middle';
     context.textAlign = 'center';
@@ -261,6 +291,7 @@ function gameOverScreen(){
 
     context.fillText('Game over', canvasW/2, canvasH/2);
     context.fillText('JS Snake by Anthony Clemens 2024',canvasW/2,(canvasH/2)+pixelSize);
+    context.fillText('Music by FesliyanStudios.com',canvasW/2,(canvasH/2)+(2*pixelSize));
 }
 
 function drawTitle(){
